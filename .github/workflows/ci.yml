@@ -39,4 +39,4 @@ jobs:
           python-version: "3.11"
       - uses: astral-sh/setup-uv@v5
       - run: uv sync --all-extras
-      - run: uv run pytest tests/ --cov=backend/src --cov-report=xml
+      - run: uv run pytest tests/ --cov=backend/src --cov-report=xml --cov-report=term-missing
