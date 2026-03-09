@@ -6,7 +6,9 @@ from fastapi.responses import JSONResponse
 
 from backend.src.saas_starter.api.v1.ai import router as ai_router
 from backend.src.saas_starter.api.v1.auth import router as auth_router
+from backend.src.saas_starter.api.v1.billing import router as billing_router
 from backend.src.saas_starter.api.v1.users import router as users_router
+from backend.src.saas_starter.api.v1.webhooks import router as webhooks_router
 from backend.src.saas_starter.core.config import settings
 from backend.src.saas_starter.core.exceptions import (
     AppError,
@@ -30,6 +32,8 @@ app.add_middleware(
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(users_router, prefix="/api/v1")
 app.include_router(ai_router, prefix="/api/v1")
+app.include_router(billing_router, prefix="/api/v1")
+app.include_router(webhooks_router, prefix="/api/v1")
 
 
 # ---------------------------------------------------------------------------
