@@ -4,7 +4,7 @@ dev:
 	docker compose up -d
 
 test:
-	uv run pytest tests/ -v --cov=backend/src --cov-report=term-missing
+	uv run pytest tests/ -v --cov --cov-report=term-missing
 
 lint:
 	uv run ruff check backend/src/ && uv run ruff format --check backend/src/

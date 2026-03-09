@@ -84,3 +84,45 @@ async def test_ai_requires_auth(client: AsyncClient) -> None:
         json={"messages": [{"role": "user", "content": "Hello"}]},
     )
     assert resp.status_code in (401, 422)
+
+
+async def test_usage_summary_aggregates_correctly(client: AsyncClient) -> None:
+    """Two chat requests result in calls_count=2."""
+    _tenant, _user, token = await seed_tenant_and_user(
+        email="ai-agg@test.com", tenant_slug="ai-agg"
+    )
+    headers = _auth(token)
+
+    # Two chat calls
+    await client.post(
+        "/api/v1/ai/chat",
+        headers=headers,
+        json={"messages": [{"role": "user", "content": "First"}]},
+    )
+    await client.post(
+        "/api/v1/ai/chat",
+        headers=headers,
+        json={"messages": [{"role": "user", "content": "Second"}]},
+    )
+
+    resp = await client.get("/api/v1/ai/usage", headers=headers)
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["calls_count"] == 2
+    assert body["total_tokens"] == 60  # 2 * (10 + 20)
+
+
+async def test_analyze_with_custom_type(client: AsyncClient) -> None:
+    """POST /ai/analyze with custom analysis_type works."""
+    _tenant, _user, token = await seed_tenant_and_user(
+        email="ai-custom@test.com", tenant_slug="ai-custom"
+    )
+    resp = await client.post(
+        "/api/v1/ai/analyze",
+        headers=_auth(token),
+        json={"text": "Custom analysis text.", "analysis_type": "keyword_extraction"},
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert "Mock response" in body["result"]
+    assert body["usage"]["input_tokens"] == 10

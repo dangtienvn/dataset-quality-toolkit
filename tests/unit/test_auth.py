@@ -89,3 +89,82 @@ def test_logout_blacklists_token() -> None:
 
     with pytest.raises(UnauthorizedError, match="revoked"):
         refresh(token)
+
+
+async def test_register_duplicate_email_raises_error() -> None:
+    """register() with duplicate email raises an error from the DB."""
+    from backend.src.saas_starter.models.tenant import Tenant
+    from backend.src.saas_starter.models.user import User
+    from tests.conftest import TestSessionLocal
+
+    # First registration
+    async with TestSessionLocal() as db:
+        req = RegisterRequest(
+            email="dup@test.com",
+            password="pass123",
+            full_name="First",
+            tenant_name="First Co",
+        )
+        await register(db, req)
+        await db.commit()
+
+    # Second registration with same email should fail
+    async with TestSessionLocal() as db:
+        req2 = RegisterRequest(
+            email="dup@test.com",
+            password="pass123",
+            full_name="Second",
+            tenant_name="Second Co",
+        )
+        with pytest.raises(Exception):
+            await register(db, req2)
+            await db.commit()
+
+
+def test_refresh_blacklisted_token_raises_unauthorized() -> None:
+    """refresh() rejects a token that was previously blacklisted via logout()."""
+    token = create_refresh_token("user-456")
+
+    # Token works initially
+    result = refresh(token)
+    assert result.access_token
+
+    # Blacklist it
+    logout(token)
+
+    # Now it should be rejected
+    with pytest.raises(UnauthorizedError, match="revoked"):
+        refresh(token)
+
+
+async def test_login_success_returns_tokens() -> None:
+    """login() with correct credentials returns tokens."""
+    from backend.src.saas_starter.models.tenant import PlanType, Tenant
+    from backend.src.saas_starter.models.user import User, UserRole
+    from backend.src.saas_starter.core.security import hash_password
+    from tests.conftest import TestSessionLocal
+
+    import uuid
+
+    async with TestSessionLocal() as db:
+        tenant = Tenant(id=uuid.uuid4(), name="LoginCo", slug="login-co", plan=PlanType.FREE)
+        db.add(tenant)
+        await db.flush()
+
+        user = User(
+            id=uuid.uuid4(),
+            email="loginsuccess@test.com",
+            hashed_password=hash_password("correct_pass"),
+            full_name="Login User",
+            role=UserRole.OWNER,
+            tenant_id=tenant.id,
+        )
+        db.add(user)
+        await db.commit()
+
+    async with TestSessionLocal() as db:
+        result = await login(db, "loginsuccess@test.com", "correct_pass")
+
+    assert result.access_token
+    assert result.refresh_token
+    assert result.token_type == "bearer"

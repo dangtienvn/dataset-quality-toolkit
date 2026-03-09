@@ -1,10 +1,15 @@
 """Integration tests for billing API endpoints."""
 
+import uuid
+from datetime import UTC, datetime
+
 from httpx import AsyncClient
 
 from backend.src.saas_starter.api.v1.billing import get_stripe_service
 from backend.src.saas_starter.main import app
-from tests.conftest import seed_tenant_and_user
+from backend.src.saas_starter.models.subscription import Subscription, SubscriptionStatus
+from backend.src.saas_starter.models.tenant import PlanType, Tenant
+from tests.conftest import TestSessionLocal, seed_tenant_and_user
 
 # ---------------------------------------------------------------------------
 # Mock Stripe
@@ -81,3 +86,80 @@ async def test_cancel_requires_active_subscription(client: AsyncClient) -> None:
     resp = await client.post("/api/v1/billing/cancel", headers=_auth(token))
     assert resp.status_code == 502
     assert "No active subscription" in resp.json()["detail"]
+
+
+async def test_billing_portal_requires_auth(client: AsyncClient) -> None:
+    """GET /billing/portal without token returns 401/422."""
+    resp = await client.get("/api/v1/billing/portal")
+    assert resp.status_code in (401, 422)
+
+
+async def test_subscribe_creates_checkout_url(client: AsyncClient) -> None:
+    """POST /billing/subscribe returns a checkout URL."""
+    _t, _u, token = await seed_tenant_and_user(
+        email="sub-checkout@test.com", tenant_slug="sub-checkout"
+    )
+    resp = await client.post(
+        "/api/v1/billing/subscribe",
+        json={"price_id": "price_starter_test"},
+        headers=_auth(token),
+    )
+    assert resp.status_code == 200
+    assert resp.json()["checkout_url"]
+
+
+async def test_get_current_plan_with_subscription(client: AsyncClient) -> None:
+    """GET /billing/current shows subscription status when one exists."""
+    _t, _u, token = await seed_tenant_and_user(
+        email="plan-sub@test.com", tenant_slug="plan-sub"
+    )
+
+    # Seed a subscription
+    async with TestSessionLocal() as db:
+        sub = Subscription(
+            id=uuid.uuid4(),
+            tenant_id=_t.id,
+            stripe_subscription_id="sub_plan_test",
+            stripe_price_id="price_starter",
+            status=SubscriptionStatus.ACTIVE,
+            current_period_end=datetime.now(UTC),
+        )
+        db.add(sub)
+        await db.commit()
+
+    resp = await client.get("/api/v1/billing/current", headers=_auth(token))
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["plan"] == "free"
+    assert body["status"] == "active"
+    assert body["current_period_end"] is not None
+
+
+async def test_billing_portal_requires_stripe_customer(client: AsyncClient) -> None:
+    """GET /billing/portal without Stripe customer returns 502."""
+    _t, _u, token = await seed_tenant_and_user(
+        email="portal-nocust@test.com", tenant_slug="portal-nocust"
+    )
+    resp = await client.get("/api/v1/billing/portal", headers=_auth(token))
+    assert resp.status_code == 502
+    assert "Subscribe to a plan first" in resp.json()["detail"]
+
+
+async def test_billing_portal_with_customer(client: AsyncClient) -> None:
+    """GET /billing/portal with Stripe customer returns portal URL."""
+    _t, _u, token = await seed_tenant_and_user(
+        email="portal-cust@test.com", tenant_slug="portal-cust"
+    )
+
+    # Set stripe_customer_id on tenant
+    async with TestSessionLocal() as db:
+        from sqlalchemy import select
+
+        result = await db.execute(select(Tenant).where(Tenant.id == _t.id))
+        tenant = result.scalar_one()
+        tenant.stripe_customer_id = "cus_portal_test"
+        await db.commit()
+
+    resp = await client.get("/api/v1/billing/portal", headers=_auth(token))
+    assert resp.status_code == 200
+    assert "portal_url" in resp.json()

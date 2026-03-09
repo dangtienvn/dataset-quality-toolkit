@@ -118,3 +118,74 @@ async def test_anonymize_logs_clears_pii() -> None:
     log = data["audit_logs"][0]
     assert log["ip_address"] == "0.0.0.0"
     assert log["details"] is None
+
+
+async def test_export_user_data_returns_user_and_usage() -> None:
+    """export_user_data includes user info and associated AI usage records."""
+    tenant_id, user_id = await _seed_full_tenant()
+
+    async with TestSessionLocal() as db:
+        svc = GDPRService(db)
+        data = await svc.export_user_data(user_id)
+
+    assert data["user"]["email"] == "gdpr@test.com"
+    assert data["user"]["full_name"] == "GDPR User"
+    assert data["user"]["role"] == "owner"
+    assert len(data["ai_usages"]) == 1
+    assert data["ai_usages"][0]["model"] == "mock-model"
+    assert data["ai_usages"][0]["cost_usd"] == "0.001000"
+
+
+async def test_anonymize_logs_returns_zero_when_no_old_logs() -> None:
+    """anonymize_logs returns 0 when no logs exist for the tenant."""
+    no_logs_tenant_id = uuid.uuid4()
+
+    async with TestSessionLocal() as db:
+        tenant = Tenant(
+            id=no_logs_tenant_id, name="NoLogs", slug="nologs-test", plan=PlanType.FREE
+        )
+        db.add(tenant)
+        await db.commit()
+
+    async with TestSessionLocal() as db:
+        svc = GDPRService(db)
+        count = await svc.anonymize_logs(no_logs_tenant_id)
+
+    assert count == 0
+
+
+async def test_delete_user_removes_user_and_related_data() -> None:
+    """delete_user removes user, their usages, and audit logs."""
+    _tenant_id, user_id = await _seed_full_tenant()
+
+    async with TestSessionLocal() as db:
+        svc = GDPRService(db)
+        count = await svc.delete_user(user_id)
+        await db.commit()
+
+    # user + usage + log = 3
+    assert count == 3
+
+    # Verify user is gone
+    async with TestSessionLocal() as db:
+        svc = GDPRService(db)
+        data = await svc.export_user_data(user_id)
+    assert data["user"] is None
+
+
+async def test_export_user_data_nonexistent_returns_empty() -> None:
+    """export_user_data for non-existent user returns None user."""
+    async with TestSessionLocal() as db:
+        svc = GDPRService(db)
+        data = await svc.export_user_data(uuid.uuid4())
+    assert data["user"] is None
+    assert data["ai_usages"] == []
+    assert data["audit_logs"] == []
+
+
+async def test_export_tenant_data_nonexistent_returns_empty() -> None:
+    """export_tenant_data for non-existent tenant returns None tenant."""
+    async with TestSessionLocal() as db:
+        svc = GDPRService(db)
+        data = await svc.export_tenant_data(uuid.uuid4())
+    assert data["tenant"] is None

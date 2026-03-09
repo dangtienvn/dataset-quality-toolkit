@@ -40,3 +40,14 @@ select = ["E", "F", "W", "I", "N", "UP", "B", "SIM"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["backend/src"]
+concurrency = ["greenlet", "thread"]
+
+[tool.coverage.report]
+omit = [
+    "backend/src/saas_starter/ai/providers/openai_provider.py",
+    "backend/src/saas_starter/ai/providers/anthropic_provider.py",
+    "backend/src/saas_starter/services/stripe_service.py",
+]
