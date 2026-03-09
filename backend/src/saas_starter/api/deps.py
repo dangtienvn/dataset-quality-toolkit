@@ -1,5 +1,6 @@
 """FastAPI dependencies for auth and tenant resolution."""
 
+import uuid as _uuid
 from collections.abc import Callable
 from typing import Annotated
 
@@ -28,9 +29,14 @@ async def get_current_user(
     token = authorization.removeprefix("Bearer ")
     payload = decode_token(token)
 
-    user_id = payload.get("sub")
-    if not user_id:
+    user_id_str = payload.get("sub")
+    if not user_id_str:
         raise UnauthorizedError("Token missing 'sub' claim")
+
+    try:
+        user_id = _uuid.UUID(user_id_str)
+    except ValueError as exc:
+        raise UnauthorizedError(f"Invalid user id in token: {exc}") from exc
 
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
