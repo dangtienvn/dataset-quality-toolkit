@@ -4,13 +4,13 @@ dev:
 	docker compose up -d
 
 test:
-	pytest tests/ -v
+	uv run pytest tests/ -v
 
 lint:
-	ruff check backend/src/ && ruff format --check backend/src/
+	uv run ruff check backend/src/ && uv run ruff format --check backend/src/
 
 fix:
-	ruff check backend/src/ --fix && ruff format backend/src/
+	uv run ruff check backend/src/ --fix && uv run ruff format backend/src/
 
 check: lint test
 

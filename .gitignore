@@ -45,5 +45,8 @@ development-playbook.md
 # Alembic
 *.pyc
 
+# Ruff
+.ruff_cache/
+
 # Docker
 *.log
