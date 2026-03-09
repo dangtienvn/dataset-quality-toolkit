@@ -48,5 +48,8 @@ development-playbook.md
 # Ruff
 .ruff_cache/
 
+# Audit
+AUDIT-PLAN.md
+
 # Docker
 *.log

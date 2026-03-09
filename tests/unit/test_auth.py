@@ -3,6 +3,7 @@
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from sqlalchemy.exc import IntegrityError
 
 from backend.src.saas_starter.core.exceptions import UnauthorizedError
 from backend.src.saas_starter.core.security import (
@@ -93,8 +94,6 @@ def test_logout_blacklists_token() -> None:
 
 async def test_register_duplicate_email_raises_error() -> None:
     """register() with duplicate email raises an error from the DB."""
-    from backend.src.saas_starter.models.tenant import Tenant
-    from backend.src.saas_starter.models.user import User
     from tests.conftest import TestSessionLocal
 
     # First registration
@@ -116,7 +115,7 @@ async def test_register_duplicate_email_raises_error() -> None:
             full_name="Second",
             tenant_name="Second Co",
         )
-        with pytest.raises(Exception):
+        with pytest.raises(IntegrityError):
             await register(db, req2)
             await db.commit()
 
@@ -139,12 +138,12 @@ def test_refresh_blacklisted_token_raises_unauthorized() -> None:
 
 async def test_login_success_returns_tokens() -> None:
     """login() with correct credentials returns tokens."""
+    import uuid
+
+    from backend.src.saas_starter.core.security import hash_password
     from backend.src.saas_starter.models.tenant import PlanType, Tenant
     from backend.src.saas_starter.models.user import User, UserRole
-    from backend.src.saas_starter.core.security import hash_password
     from tests.conftest import TestSessionLocal
-
-    import uuid
 
     async with TestSessionLocal() as db:
         tenant = Tenant(id=uuid.uuid4(), name="LoginCo", slug="login-co", plan=PlanType.FREE)

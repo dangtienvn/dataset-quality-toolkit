@@ -144,11 +144,11 @@ async def test_update_user_role_by_admin(client: AsyncClient) -> None:
         role=UserRole.ADMIN, email="admin-upd@test.com", tenant_slug="admin-upd"
     )
     # Invite a member via owner first — seed directly
+    import uuid
+
     from backend.src.saas_starter.core.security import hash_password
     from backend.src.saas_starter.models.user import User
     from tests.conftest import TestSessionLocal
-
-    import uuid
 
     member_id = uuid.uuid4()
     async with TestSessionLocal() as db:
@@ -177,11 +177,11 @@ async def test_deactivate_user_by_owner(client: AsyncClient) -> None:
     _t, _owner, owner_token = await seed_tenant_and_user(
         email="owner-deact@test.com", tenant_slug="owner-deact"
     )
+    import uuid
+
     from backend.src.saas_starter.core.security import hash_password
     from backend.src.saas_starter.models.user import User
     from tests.conftest import TestSessionLocal
-
-    import uuid
 
     member_id = uuid.uuid4()
     async with TestSessionLocal() as db:

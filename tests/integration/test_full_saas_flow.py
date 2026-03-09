@@ -10,7 +10,6 @@ from backend.src.saas_starter.main import app
 from backend.src.saas_starter.models.subscription import Subscription, SubscriptionStatus
 from tests.conftest import TestSessionLocal, seed_tenant_and_user
 
-
 # ---------------------------------------------------------------------------
 # Mock Stripe (reuse pattern from test_billing_api)
 # ---------------------------------------------------------------------------
@@ -169,9 +168,7 @@ async def test_multi_tenant_isolation(client: AsyncClient) -> None:
 
 async def test_subscription_flow(client: AsyncClient) -> None:
     """Subscribe and cancel flow with MockStripeService."""
-    _t, _u, token = await seed_tenant_and_user(
-        email="sub-flow@test.com", tenant_slug="sub-flow"
-    )
+    _t, _u, token = await seed_tenant_and_user(email="sub-flow@test.com", tenant_slug="sub-flow")
     headers = _auth(token)
 
     # New tenant → free plan

@@ -1,10 +1,7 @@
 """Integration tests for GDPR API endpoints."""
 
-from decimal import Decimal
-
 from httpx import AsyncClient
 
-from backend.src.saas_starter.models.ai_usage import AIUsage
 from backend.src.saas_starter.models.audit_log import AuditLog
 from tests.conftest import TestSessionLocal, seed_tenant_and_user
 
@@ -26,9 +23,7 @@ async def test_export_tenant_data(client: AsyncClient) -> None:
 
 async def test_export_user_data(client: AsyncClient) -> None:
     """GET /gdpr/user/export returns user data."""
-    _t, _u, token = await seed_tenant_and_user(
-        email="gdpr-uexp@test.com", tenant_slug="gdpr-uexp"
-    )
+    _t, _u, token = await seed_tenant_and_user(email="gdpr-uexp@test.com", tenant_slug="gdpr-uexp")
     resp = await client.get("/api/v1/gdpr/user/export", headers=_auth(token))
     assert resp.status_code == 200
     body = resp.json()
@@ -56,9 +51,7 @@ async def test_admin_dashboard(client: AsyncClient) -> None:
 
 async def test_delete_tenant_data_removes_records(client: AsyncClient) -> None:
     """DELETE /gdpr/tenant deletes all tenant data."""
-    _t, _u, token = await seed_tenant_and_user(
-        email="gdpr-del@test.com", tenant_slug="gdpr-del"
-    )
+    _t, _u, token = await seed_tenant_and_user(email="gdpr-del@test.com", tenant_slug="gdpr-del")
     resp = await client.delete("/api/v1/gdpr/tenant", headers=_auth(token))
     assert resp.status_code == 200
     body = resp.json()
@@ -68,9 +61,7 @@ async def test_delete_tenant_data_removes_records(client: AsyncClient) -> None:
 
 async def test_delete_user_data_removes_user(client: AsyncClient) -> None:
     """DELETE /gdpr/user deletes user data."""
-    _t, _u, token = await seed_tenant_and_user(
-        email="gdpr-udel@test.com", tenant_slug="gdpr-udel"
-    )
+    _t, _u, token = await seed_tenant_and_user(email="gdpr-udel@test.com", tenant_slug="gdpr-udel")
     resp = await client.delete("/api/v1/gdpr/user", headers=_auth(token))
     assert resp.status_code == 200
     body = resp.json()
@@ -79,9 +70,7 @@ async def test_delete_user_data_removes_user(client: AsyncClient) -> None:
 
 async def test_anonymize_logs_with_seeded_data(client: AsyncClient) -> None:
     """POST /gdpr/anonymize-logs anonymizes audit log PII."""
-    _t, _u, token = await seed_tenant_and_user(
-        email="gdpr-anon@test.com", tenant_slug="gdpr-anon"
-    )
+    _t, _u, token = await seed_tenant_and_user(email="gdpr-anon@test.com", tenant_slug="gdpr-anon")
 
     # Seed an audit log
     async with TestSessionLocal() as db:

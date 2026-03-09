@@ -141,9 +141,7 @@ async def test_anonymize_logs_returns_zero_when_no_old_logs() -> None:
     no_logs_tenant_id = uuid.uuid4()
 
     async with TestSessionLocal() as db:
-        tenant = Tenant(
-            id=no_logs_tenant_id, name="NoLogs", slug="nologs-test", plan=PlanType.FREE
-        )
+        tenant = Tenant(id=no_logs_tenant_id, name="NoLogs", slug="nologs-test", plan=PlanType.FREE)
         db.add(tenant)
         await db.commit()
 

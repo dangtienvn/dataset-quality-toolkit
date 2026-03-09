@@ -12,7 +12,7 @@ _BASE_URL = "https://api.stripe.com/v1"
 class StripeService:
     """Async wrapper around the Stripe REST API."""
 
-    def __init__(self, secret_key: str = "") -> None:
+    def __init__(self, secret_key: str | None = None) -> None:
         self.secret_key = secret_key or settings.stripe_secret_key
 
     def _headers(self) -> dict[str, str]:

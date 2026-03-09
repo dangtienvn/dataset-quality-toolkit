@@ -8,7 +8,7 @@ from sqlalchemy import select
 from backend.src.saas_starter.api.deps import CurrentUser, DBSession
 from backend.src.saas_starter.core.config import settings
 from backend.src.saas_starter.core.exceptions import StripeError
-from backend.src.saas_starter.models.subscription import Subscription
+from backend.src.saas_starter.models.subscription import Subscription, SubscriptionStatus
 from backend.src.saas_starter.models.tenant import Tenant
 from backend.src.saas_starter.schemas.billing import (
     CurrentPlanResponse,
@@ -117,7 +117,7 @@ async def cancel_subscription(
     except Exception as exc:
         raise StripeError(f"Failed to cancel subscription: {exc}") from exc
 
-    sub.status = "canceled"
+    sub.status = SubscriptionStatus.CANCELED
     await db.flush()
     return {"message": "subscription canceled"}
 

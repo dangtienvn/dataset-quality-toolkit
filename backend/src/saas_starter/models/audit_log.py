@@ -1,12 +1,19 @@
 """Audit log model for GDPR compliance."""
 
+from __future__ import annotations
+
 import uuid
+from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.dialects.postgresql import JSON, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.src.saas_starter.models.base import Base, TimestampMixin, generate_uuid
+
+if TYPE_CHECKING:
+    from backend.src.saas_starter.models.tenant import Tenant
+    from backend.src.saas_starter.models.user import User
 
 
 class AuditLog(TimestampMixin, Base):
@@ -28,5 +35,5 @@ class AuditLog(TimestampMixin, Base):
     details: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     ip_address: Mapped[str] = mapped_column(String(45), nullable=False)
 
-    tenant: Mapped["Tenant"] = relationship(back_populates="audit_logs")  # noqa: F821
-    user: Mapped["User | None"] = relationship(back_populates="audit_logs")  # noqa: F821
+    tenant: Mapped[Tenant] = relationship(back_populates="audit_logs")
+    user: Mapped[User | None] = relationship(back_populates="audit_logs")

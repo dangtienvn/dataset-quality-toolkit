@@ -1,14 +1,22 @@
 """User model with role-based access control."""
 
+from __future__ import annotations
+
 import enum
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.src.saas_starter.models.base import Base, TimestampMixin, generate_uuid
+
+if TYPE_CHECKING:
+    from backend.src.saas_starter.models.ai_usage import AIUsage
+    from backend.src.saas_starter.models.audit_log import AuditLog
+    from backend.src.saas_starter.models.tenant import Tenant
 
 
 class UserRole(enum.StrEnum):
@@ -37,6 +45,6 @@ class User(TimestampMixin, Base):
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     last_login: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    tenant: Mapped["Tenant"] = relationship(back_populates="users")  # noqa: F821
-    ai_usages: Mapped[list["AIUsage"]] = relationship(back_populates="user")  # noqa: F821
-    audit_logs: Mapped[list["AuditLog"]] = relationship(back_populates="user")  # noqa: F821
+    tenant: Mapped[Tenant] = relationship(back_populates="users")
+    ai_usages: Mapped[list[AIUsage]] = relationship(back_populates="user")
+    audit_logs: Mapped[list[AuditLog]] = relationship(back_populates="user")

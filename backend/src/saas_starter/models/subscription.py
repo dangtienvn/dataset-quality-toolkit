@@ -1,14 +1,20 @@
 """Subscription model for Stripe billing (ADR-005)."""
 
+from __future__ import annotations
+
 import enum
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.src.saas_starter.models.base import Base, TimestampMixin, generate_uuid
+
+if TYPE_CHECKING:
+    from backend.src.saas_starter.models.tenant import Tenant
 
 
 class SubscriptionStatus(enum.StrEnum):
@@ -38,4 +44,4 @@ class Subscription(TimestampMixin, Base):
     )
     current_period_end: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
-    tenant: Mapped["Tenant"] = relationship(back_populates="subscriptions")  # noqa: F821
+    tenant: Mapped[Tenant] = relationship(back_populates="subscriptions")

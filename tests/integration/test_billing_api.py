@@ -8,7 +8,7 @@ from httpx import AsyncClient
 from backend.src.saas_starter.api.v1.billing import get_stripe_service
 from backend.src.saas_starter.main import app
 from backend.src.saas_starter.models.subscription import Subscription, SubscriptionStatus
-from backend.src.saas_starter.models.tenant import PlanType, Tenant
+from backend.src.saas_starter.models.tenant import Tenant
 from tests.conftest import TestSessionLocal, seed_tenant_and_user
 
 # ---------------------------------------------------------------------------
@@ -110,9 +110,7 @@ async def test_subscribe_creates_checkout_url(client: AsyncClient) -> None:
 
 async def test_get_current_plan_with_subscription(client: AsyncClient) -> None:
     """GET /billing/current shows subscription status when one exists."""
-    _t, _u, token = await seed_tenant_and_user(
-        email="plan-sub@test.com", tenant_slug="plan-sub"
-    )
+    _t, _u, token = await seed_tenant_and_user(email="plan-sub@test.com", tenant_slug="plan-sub")
 
     # Seed a subscription
     async with TestSessionLocal() as db:

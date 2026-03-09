@@ -37,6 +37,15 @@ line-length = 100
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "UP", "B", "SIM"]
 
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+mypy_path = "."
+namespace_packages = true
+explicit_package_bases = true
+plugins = ["sqlalchemy.ext.mypy.plugin"]
+exclude = ["tests/"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
@@ -50,4 +59,11 @@ omit = [
     "backend/src/saas_starter/ai/providers/openai_provider.py",
     "backend/src/saas_starter/ai/providers/anthropic_provider.py",
     "backend/src/saas_starter/services/stripe_service.py",
+]
+
+[dependency-groups]
+dev = [
+    "interrogate>=1.7.0",
+    "mypy>=1.19.1",
+    "vulture>=2.15",
 ]

@@ -1,13 +1,22 @@
 """Tenant model for multi-tenancy support."""
 
+from __future__ import annotations
+
 import enum
 import uuid
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, Enum, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.src.saas_starter.models.base import Base, TimestampMixin, generate_uuid
+
+if TYPE_CHECKING:
+    from backend.src.saas_starter.models.ai_usage import AIUsage
+    from backend.src.saas_starter.models.audit_log import AuditLog
+    from backend.src.saas_starter.models.subscription import Subscription
+    from backend.src.saas_starter.models.user import User
 
 
 class PlanType(enum.StrEnum):
@@ -32,9 +41,7 @@ class Tenant(TimestampMixin, Base):
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     stripe_customer_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
-    users: Mapped[list["User"]] = relationship(back_populates="tenant")  # noqa: F821
-    subscriptions: Mapped[list["Subscription"]] = relationship(  # noqa: F821
-        back_populates="tenant"
-    )
-    ai_usages: Mapped[list["AIUsage"]] = relationship(back_populates="tenant")  # noqa: F821
-    audit_logs: Mapped[list["AuditLog"]] = relationship(back_populates="tenant")  # noqa: F821
+    users: Mapped[list[User]] = relationship(back_populates="tenant")
+    subscriptions: Mapped[list[Subscription]] = relationship(back_populates="tenant")
+    ai_usages: Mapped[list[AIUsage]] = relationship(back_populates="tenant")
+    audit_logs: Mapped[list[AuditLog]] = relationship(back_populates="tenant")
