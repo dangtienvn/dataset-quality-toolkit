@@ -192,7 +192,7 @@ class GDPRService:
             await self.db.execute(
                 update(AuditLog)
                 .where(AuditLog.tenant_id == tenant_id)
-                .values(ip_address="0.0.0.0", user_id=None, details=None)
+                .values(ip_address="0.0.0.0", user_id=None, details=None)  # nosec B104 - anonymization placeholder
             )
             await self.db.flush()
 
