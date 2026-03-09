@@ -37,9 +37,7 @@ def test_create_and_decode_access_token() -> None:
 
 def test_expired_token_raises_exception() -> None:
     """An expired token raises UnauthorizedError."""
-    with patch(
-        "backend.src.saas_starter.core.security.settings"
-    ) as mock_settings:
+    with patch("backend.src.saas_starter.core.security.settings") as mock_settings:
         mock_settings.access_token_expire_minutes = 0
         mock_settings.jwt_secret = "test-secret"
         mock_settings.jwt_algorithm = "HS256"

@@ -1,13 +1,11 @@
 """Unit tests for auth_service logic."""
 
-import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from backend.src.saas_starter.core.exceptions import UnauthorizedError
 from backend.src.saas_starter.core.security import (
-    create_access_token,
     create_refresh_token,
 )
 from backend.src.saas_starter.schemas.auth import RegisterRequest
