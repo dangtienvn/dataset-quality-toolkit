@@ -1,6 +1,7 @@
 """AI usage tracking service (ADR-004)."""
 
 import uuid
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 
 from sqlalchemy import func, select
@@ -18,6 +19,9 @@ async def track_usage(
     output_tokens: int,
     cost_usd: Decimal,
     feature: str,
+    provider: str = "",
+    latency_ms: int = 0,
+    endpoint: str = "",
 ) -> AIUsage:
     """Record a single LLM call in the usage table."""
     record = AIUsage(
@@ -28,6 +32,9 @@ async def track_usage(
         output_tokens=output_tokens,
         cost_usd=cost_usd,
         feature=feature,
+        provider=provider,
+        latency_ms=latency_ms,
+        endpoint=endpoint,
     )
     db.add(record)
     await db.flush()
@@ -40,7 +47,7 @@ async def get_usage_summary(
     days: int = 30,
 ) -> dict:
     """Aggregate usage stats for a tenant over the given period."""
-    cutoff = func.datetime("now", f"-{days} days")
+    cutoff = datetime.now(UTC) - timedelta(days=days)
 
     query = (
         select(

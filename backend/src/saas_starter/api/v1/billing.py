@@ -1,5 +1,6 @@
 """Billing endpoints: plans, subscribe, cancel, portal, current plan."""
 
+from datetime import UTC, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
@@ -9,7 +10,7 @@ from backend.src.saas_starter.api.deps import CurrentUser, DBSession
 from backend.src.saas_starter.core.config import settings
 from backend.src.saas_starter.core.exceptions import StripeError
 from backend.src.saas_starter.models.subscription import Subscription, SubscriptionStatus
-from backend.src.saas_starter.models.tenant import Tenant
+from backend.src.saas_starter.models.tenant import PlanType, Tenant
 from backend.src.saas_starter.schemas.billing import (
     CurrentPlanResponse,
     PlanInfo,
@@ -27,6 +28,11 @@ def get_stripe_service() -> StripeService:
 
 
 StripeDep = Annotated[StripeService, Depends(get_stripe_service)]
+
+_PRICE_TO_PLAN: dict[str, PlanType] = {
+    settings.stripe_price_id_starter: PlanType.STARTER,
+    settings.stripe_price_id_pro: PlanType.PRO,
+}
 
 _PLANS = [
     PlanInfo(
@@ -70,11 +76,9 @@ async def subscribe(
     stripe: StripeDep,
 ) -> SubscribeResponse:
     """Create a Stripe subscription for the current tenant."""
-    # Get tenant
     result = await db.execute(select(Tenant).where(Tenant.id == user.tenant_id))
     tenant = result.scalar_one()
 
-    # Ensure Stripe customer exists
     customer_id = tenant.stripe_customer_id
     if not customer_id:
         try:
@@ -86,13 +90,29 @@ async def subscribe(
         tenant.stripe_customer_id = customer_id
         await db.flush()
 
-    # Create subscription
     try:
         sub_data = await stripe.create_subscription(customer_id, req.price_id)
     except Exception as exc:
         raise StripeError(f"Failed to create subscription: {exc}") from exc
 
-    # For simplicity, return a checkout URL placeholder
+    period_end_ts = sub_data.get("current_period_end")
+    period_end = (
+        datetime.fromtimestamp(period_end_ts, tz=UTC) if period_end_ts else datetime.now(UTC)
+    )
+
+    subscription = Subscription(
+        tenant_id=tenant.id,
+        stripe_subscription_id=sub_data.get("id", ""),
+        stripe_price_id=req.price_id,
+        status=SubscriptionStatus.ACTIVE,
+        current_period_end=period_end,
+    )
+    db.add(subscription)
+
+    new_plan = _PRICE_TO_PLAN.get(req.price_id, PlanType.FREE)
+    tenant.plan = new_plan
+    await db.flush()
+
     checkout_url = sub_data.get("latest_invoice", {}).get(
         "hosted_invoice_url", f"https://checkout.stripe.com/{sub_data.get('id', '')}"
     )
@@ -107,7 +127,13 @@ async def cancel_subscription(
     stripe: StripeDep,
 ) -> dict:
     """Cancel the active subscription for the current tenant."""
-    result = await db.execute(select(Subscription).where(Subscription.tenant_id == user.tenant_id))
+    result = await db.execute(
+        select(Subscription)
+        .where(Subscription.tenant_id == user.tenant_id)
+        .where(Subscription.status == SubscriptionStatus.ACTIVE)
+        .order_by(Subscription.created_at.desc())
+        .limit(1)
+    )
     sub = result.scalar_one_or_none()
     if not sub:
         raise StripeError("No active subscription found")
@@ -132,8 +158,9 @@ async def billing_portal(user: CurrentUser, db: DBSession, stripe: StripeDep) ->
         raise StripeError("No Stripe customer found. Subscribe to a plan first.")
 
     try:
+        return_url = f"{settings.cors_origins_list[0]}/settings"
         url = await stripe.create_billing_portal_session(
-            tenant.stripe_customer_id, return_url="http://localhost:3000/settings"
+            tenant.stripe_customer_id, return_url=return_url
         )
     except Exception as exc:
         raise StripeError(f"Failed to create portal session: {exc}") from exc

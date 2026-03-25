@@ -1,5 +1,8 @@
 """FastAPI application entry point."""
 
+import logging
+
+import structlog
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -20,6 +23,38 @@ from backend.src.saas_starter.core.exceptions import (
     UnauthorizedError,
     UserNotFoundError,
 )
+
+
+def _configure_structlog() -> None:
+    structlog.configure(
+        processors=[
+            structlog.contextvars.merge_contextvars,
+            structlog.stdlib.filter_by_level,
+            structlog.stdlib.add_logger_name,
+            structlog.stdlib.add_log_level,
+            structlog.stdlib.PositionalArgumentsFormatter(),
+            structlog.processors.TimeStamper(fmt="iso"),
+            structlog.processors.StackInfoRenderer(),
+            structlog.processors.format_exc_info,
+            structlog.processors.UnicodeDecoder(),
+            structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
+        ],
+        logger_factory=structlog.stdlib.LoggerFactory(),
+        wrapper_class=structlog.stdlib.BoundLogger,
+        cache_logger_on_first_use=True,
+    )
+    handler = logging.StreamHandler()
+    handler.setFormatter(
+        structlog.stdlib.ProcessorFormatter(
+            processor=structlog.dev.ConsoleRenderer(),
+        )
+    )
+    root = logging.getLogger()
+    root.addHandler(handler)
+    root.setLevel(settings.log_level.upper())
+
+
+_configure_structlog()
 
 app = FastAPI(title="ai-saas-starter", version="0.1.0")
 

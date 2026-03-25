@@ -7,7 +7,6 @@ graph TB
     User[User Browser]
     Frontend[React/Next.js Frontend]
     API[FastAPI Backend]
-    Auth[Auth Service JWT+OAuth2]
     AI[AI Module]
     LLM_Abstract[LLM Abstraction Layer]
     OpenAI[OpenAI API]
@@ -16,12 +15,10 @@ graph TB
     Agents[ai-agent-engine Optional]
     DB[(PostgreSQL)]
     Stripe[Stripe API]
-    Dashboard[AI Usage Dashboard]
     GDPR[GDPR Compliance]
 
     User --> Frontend
     Frontend --> API
-    API --> Auth
     API --> AI
     AI --> LLM_Abstract
     LLM_Abstract --> OpenAI
@@ -30,35 +27,32 @@ graph TB
     AI --> Agents
     API --> DB
     API --> Stripe
-    API --> Dashboard
-    Dashboard --> DB
     GDPR --> DB
 ```
 
 ## Components
 
 ### Backend (FastAPI)
-- **api/** — HTTP routes organized by domain (auth, ai, billing, gdpr, admin)
-- **core/** — Configuration, security utilities, dependency injection
-- **ai/** — LLM abstraction layer, chat/summarize/analyze services
-- **auth/** — JWT token management, OAuth2, RBAC
-- **models/** — SQLAlchemy ORM models
+- **api/v1/** — HTTP routes organized by domain (auth, users, ai, billing, gdpr, admin, webhooks)
+- **api/deps.py** — Dependency injection (DB sessions, JWT auth, RBAC)
+- **core/** — Configuration (`config.py`), security utilities (`security.py`), database setup (`database.py`), custom exceptions (`exceptions.py`)
+- **ai/** — LLM abstraction layer (`base.py`, `router.py`), feature implementations (`features/chat.py`, `features/summarize.py`, `features/analyze.py`), providers (`providers/openai_provider.py`, `providers/anthropic_provider.py`, `providers/mock_provider.py`)
+- **models/** — SQLAlchemy ORM models (User, Tenant, Subscription, AIUsage, AuditLog)
 - **schemas/** — Pydantic request/response schemas
-- **services/** — Business logic layer
-- **utils/** — Shared utilities
+- **services/** — Business logic (auth_service, stripe_service, usage_service, gdpr_service)
 
 ### Frontend (React/Next.js)
+- Landing page
 - Login/Register pages
 - AI Chat interface
-- AI Usage Dashboard (charts)
-- Settings page (plan, data export/delete)
+- Dashboard page
 
 ### Database (PostgreSQL)
-- Row-level multi-tenancy with tenant_id
-- Alembic migrations
+- Row-level multi-tenancy with `tenant_id` on all data tables
+- Alembic migrations (located in `backend/alembic/`)
 
 ### External Services
-- **OpenAI / Anthropic** — LLM providers via abstraction layer
-- **Stripe** — Subscription and usage-based billing
+- **OpenAI / Anthropic** — LLM providers via abstraction layer (ADR-002)
+- **Stripe** — Subscription billing with webhook integration (ADR-005)
 - **rag-engine** — Optional document search module
 - **ai-agent-engine** — Optional agent orchestration module

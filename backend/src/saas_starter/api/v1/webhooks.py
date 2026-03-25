@@ -70,6 +70,9 @@ async def stripe_webhook(
     return JSONResponse(status_code=200, content={"received": True})
 
 
+_STRIPE_TO_STATUS: dict[str, SubscriptionStatus] = {s.value: s for s in SubscriptionStatus}
+
+
 async def _handle_subscription_updated(db, data: dict) -> None:
     """Update subscription status from Stripe event."""
     stripe_sub_id = data.get("id", "")
@@ -80,9 +83,10 @@ async def _handle_subscription_updated(db, data: dict) -> None:
     if not sub:
         return
 
-    status = data.get("status", "")
-    if status in SubscriptionStatus.__members__.values():
-        sub.status = status
+    raw_status = data.get("status", "")
+    mapped_status = _STRIPE_TO_STATUS.get(raw_status)
+    if mapped_status is not None:
+        sub.status = mapped_status
     await db.flush()
 
 

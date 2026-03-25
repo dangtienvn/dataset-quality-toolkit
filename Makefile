@@ -1,4 +1,4 @@
-.PHONY: dev test lint check fix migrate migrate-down frontend-dev
+.PHONY: dev test lint check fix migrate migrate-down migrate-create frontend-dev
 
 dev:
 	docker compose up -d
@@ -15,10 +15,13 @@ fix:
 check: lint test
 
 migrate:
-	uv run alembic upgrade head
+	cd backend && uv run alembic upgrade head
 
 migrate-down:
-	uv run alembic downgrade -1
+	cd backend && uv run alembic downgrade -1
+
+migrate-create:
+	cd backend && uv run alembic revision --autogenerate -m "$(msg)"
 
 frontend-dev:
 	cd frontend && npm run dev

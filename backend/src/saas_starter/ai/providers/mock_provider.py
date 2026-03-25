@@ -8,6 +8,10 @@ from backend.src.saas_starter.ai.base import BaseLLMProvider, LLMResponse
 class MockLLMProvider(BaseLLMProvider):
     """Deterministic mock provider that returns fixed responses."""
 
+    @property
+    def provider_name(self) -> str:
+        return "mock"
+
     async def complete(
         self,
         prompt: str,
@@ -19,6 +23,7 @@ class MockLLMProvider(BaseLLMProvider):
         return LLMResponse(
             content=f"Mock response to: {prompt[:50]}",
             model=model or "mock-model",
+            provider=self.provider_name,
             input_tokens=10,
             output_tokens=20,
             cost_usd=Decimal("0.001"),

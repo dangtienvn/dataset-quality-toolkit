@@ -32,12 +32,15 @@ class AIUsage(TimestampMixin, Base):
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=False
     )
     model: Mapped[str] = mapped_column(String(100), nullable=False)
+    provider: Mapped[str] = mapped_column(String(100), nullable=False, default="")
     input_tokens: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     output_tokens: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     cost_usd: Mapped[Decimal] = mapped_column(
         Numeric(precision=10, scale=6), nullable=False, default=Decimal("0")
     )
+    latency_ms: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     feature: Mapped[str] = mapped_column(String(100), nullable=False)
+    endpoint: Mapped[str] = mapped_column(String(255), nullable=False, default="")
 
     tenant: Mapped[Tenant] = relationship(back_populates="ai_usages")
     user: Mapped[User] = relationship(back_populates="ai_usages")

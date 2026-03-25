@@ -7,13 +7,12 @@ Accepted
 The SaaS needs a billing model that covers infrastructure costs and scales with AI usage. Pure subscription leaves heavy users under-charged. Pure usage-based creates unpredictable revenue. We need a hybrid approach.
 
 ## Decision
-Use Stripe for subscription tiers with usage-based overage:
-- **Free tier**: limited AI calls per month (e.g., 100)
-- **Starter tier**: higher limits, priority models
-- **Pro tier**: highest limits, all models, priority support
-- Usage beyond tier limits billed per token via Stripe usage records
+Use Stripe for subscription tiers:
+- **Free tier**: limited AI calls per month (100)
+- **Starter tier**: higher limits (5,000), priority models
+- **Pro tier**: unlimited calls, all models, priority support
 
-Stripe webhooks handle subscription lifecycle (created, updated, cancelled, payment failed).
+Stripe webhooks handle subscription lifecycle (created, updated, cancelled, payment failed). AI usage is tracked per-call (tokens, cost, provider, latency) to support future usage-based billing extensions.
 
 ## Alternatives Considered
 - **Paddle** — handles tax compliance better but smaller ecosystem and fewer integrations. Rejected because Stripe's developer experience and documentation are superior.

@@ -1,14 +1,10 @@
 """End-to-end integration tests covering the complete SaaS flow."""
 
-import uuid
-from datetime import UTC, datetime
-
 from httpx import AsyncClient
 
 from backend.src.saas_starter.api.v1.billing import get_stripe_service
 from backend.src.saas_starter.main import app
-from backend.src.saas_starter.models.subscription import Subscription, SubscriptionStatus
-from tests.conftest import TestSessionLocal, seed_tenant_and_user
+from tests.conftest import seed_tenant_and_user
 
 # ---------------------------------------------------------------------------
 # Mock Stripe (reuse pattern from test_billing_api)
@@ -176,7 +172,7 @@ async def test_subscription_flow(client: AsyncClient) -> None:
     assert resp.status_code == 200
     assert resp.json()["plan"] == "free"
 
-    # Subscribe
+    # Subscribe — now also creates a Subscription row in DB
     resp = await client.post(
         "/api/v1/billing/subscribe",
         json={"price_id": "price_starter_test"},
@@ -185,20 +181,7 @@ async def test_subscription_flow(client: AsyncClient) -> None:
     assert resp.status_code == 200
     assert resp.json()["checkout_url"]
 
-    # Seed a subscription record so cancel works
-    async with TestSessionLocal() as db:
-        sub = Subscription(
-            id=uuid.uuid4(),
-            tenant_id=_t.id,
-            stripe_subscription_id="sub_flow_456",
-            stripe_price_id="price_starter_test",
-            status=SubscriptionStatus.ACTIVE,
-            current_period_end=datetime.now(UTC),
-        )
-        db.add(sub)
-        await db.commit()
-
-    # Cancel
+    # Cancel — uses the subscription created by subscribe
     resp = await client.post("/api/v1/billing/cancel", headers=headers)
     assert resp.status_code == 200
     assert resp.json()["message"] == "subscription canceled"

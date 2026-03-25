@@ -49,5 +49,8 @@ class AnalyzeFeature:
             output_tokens=response.output_tokens,
             cost_usd=response.cost_usd,
             feature="analyze",
+            provider=response.provider,
+            latency_ms=response.latency_ms,
+            endpoint="/ai/analyze",
         )
         return response

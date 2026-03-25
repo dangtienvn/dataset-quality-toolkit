@@ -18,9 +18,17 @@ _DEFAULT_PRICING = (Decimal("3.00"), Decimal("15.00"))
 class AnthropicProvider(BaseLLMProvider):
     """Anthropic messages API via REST."""
 
+    @property
+    def provider_name(self) -> str:
+        return "anthropic"
+
     def __init__(self, api_key: str = "") -> None:
         self.api_key = api_key or settings.anthropic_api_key
         self.base_url = "https://api.anthropic.com/v1"
+
+    def get_cost(self, model: str, input_tokens: int, output_tokens: int) -> Decimal:
+        inp_price, out_price = _PRICING.get(model, _DEFAULT_PRICING)
+        return (inp_price * input_tokens + out_price * output_tokens) / Decimal("1000000")
 
     async def complete(
         self,
@@ -64,6 +72,7 @@ class AnthropicProvider(BaseLLMProvider):
         return LLMResponse(
             content=content,
             model=model,
+            provider=self.provider_name,
             input_tokens=input_tokens,
             output_tokens=output_tokens,
             cost_usd=cost,

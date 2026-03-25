@@ -8,6 +8,10 @@ from backend.src.saas_starter.ai.router import LLMRouter
 class _FailingProvider(BaseLLMProvider):
     """Provider that always raises an error."""
 
+    @property
+    def provider_name(self) -> str:
+        return "failing"
+
     async def complete(self, prompt, system_prompt="", model="", max_tokens=1024):
         raise RuntimeError("Provider unavailable")
 

@@ -13,7 +13,7 @@
 
 ## Error Handling
 - Specific exceptions, never bare `except:`
-- Custom exceptions in backend/src/saas_starter/exceptions.py
+- Custom exceptions in backend/src/saas_starter/core/exceptions.py
 
 ## Logging
 - structlog for structured logs, never print()

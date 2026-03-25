@@ -1,10 +1,25 @@
 """LLM router: routes requests to the appropriate provider (ADR-002)."""
 
+import time
+
 import structlog
 
 from backend.src.saas_starter.ai.base import BaseLLMProvider, LLMResponse
 
 logger = structlog.get_logger()
+
+
+class LLMProviderError(Exception):
+    """Raised when an LLM provider call fails."""
+
+    def __init__(self, provider: str, message: str, cause: Exception | None = None) -> None:
+        self.provider = provider
+        super().__init__(f"[{provider}] {message}")
+        self.__cause__ = cause
+
+
+class AllProvidersFailedError(Exception):
+    """Raised when all configured LLM providers have failed."""
 
 
 class LLMRouter:
@@ -36,16 +51,29 @@ class LLMRouter:
         """Route a request with fallback on provider failure."""
         primary = self.get_provider(model)
         fallback_names = [name for name, p in self.providers.items() if p is not primary]
+        errors: list[LLMProviderError] = []
 
+        start = time.monotonic()
         try:
-            return await primary.complete(prompt, system_prompt, model, max_tokens)
-        except Exception:
-            logger.warning("primary_provider_failed", model=model)
+            response = await primary.complete(prompt, system_prompt, model, max_tokens)
+            response.latency_ms = int((time.monotonic() - start) * 1000)
+            return response
+        except (ConnectionError, TimeoutError, OSError, RuntimeError, ValueError) as exc:
+            err = LLMProviderError(primary.provider_name, str(exc), cause=exc)
+            errors.append(err)
+            logger.warning("primary_provider_failed", model=model, error=str(exc))
 
         for name in fallback_names:
+            start = time.monotonic()
             try:
-                return await self.providers[name].complete(prompt, system_prompt, model, max_tokens)
-            except Exception:
-                logger.warning("fallback_provider_failed", provider=name)
+                response = await self.providers[name].complete(
+                    prompt, system_prompt, model, max_tokens
+                )
+                response.latency_ms = int((time.monotonic() - start) * 1000)
+                return response
+            except (ConnectionError, TimeoutError, OSError, RuntimeError, ValueError) as exc:
+                err = LLMProviderError(name, str(exc), cause=exc)
+                errors.append(err)
+                logger.warning("fallback_provider_failed", provider=name, error=str(exc))
 
-        raise RuntimeError("All LLM providers failed")
+        raise AllProvidersFailedError(f"All LLM providers failed: {[str(e) for e in errors]}")

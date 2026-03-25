@@ -35,21 +35,8 @@ htmlcov/
 .coverage
 coverage.xml
 
-# Claude Code
-CLAUDE.md
-.claude/
-
-# Playbook (не коммитить в проект)
-development-playbook.md
-
-# Alembic
-*.pyc
-
 # Ruff
 .ruff_cache/
-
-# Audit
-AUDIT-PLAN.md
 
 # Docker
 *.log

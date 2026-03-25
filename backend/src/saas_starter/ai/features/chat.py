@@ -36,5 +36,8 @@ class ChatFeature:
             output_tokens=response.output_tokens,
             cost_usd=response.cost_usd,
             feature="chat",
+            provider=response.provider,
+            latency_ms=response.latency_ms,
+            endpoint="/ai/chat",
         )
         return response
