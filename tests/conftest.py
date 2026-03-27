@@ -1,10 +1,15 @@
-"""Shared test fixtures: async SQLite engine, client, seed helpers."""
+"""Shared test fixtures: async engine, client, seed helpers.
 
+By default tests use an in-memory SQLite database for speed.
+Set TEST_DATABASE_URL to a PostgreSQL connection string to run
+against a real database (used in CI).
+"""
+
+import os
 import uuid
 
 import pytest
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy import StaticPool, event
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from backend.src.saas_starter.ai import create_mock_router
@@ -17,22 +22,29 @@ from backend.src.saas_starter.models.tenant import PlanType, Tenant
 from backend.src.saas_starter.models.user import User, UserRole
 
 # ---------------------------------------------------------------------------
-# Async SQLite test engine (shared across all integration tests)
+# Test engine: PostgreSQL when TEST_DATABASE_URL is set, SQLite otherwise
 # ---------------------------------------------------------------------------
 
-test_engine = create_async_engine(
-    "sqlite+aiosqlite:///:memory:",
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
+_test_db_url = os.environ.get("TEST_DATABASE_URL", "")
 
+if _test_db_url:
+    from sqlalchemy.pool import NullPool
 
-@event.listens_for(test_engine.sync_engine, "connect")
-def _enable_fk(dbapi_conn, _connection_record):
-    """Enable foreign key support in SQLite."""
-    cursor = dbapi_conn.cursor()
-    cursor.execute("PRAGMA foreign_keys=ON")
-    cursor.close()
+    test_engine = create_async_engine(_test_db_url, poolclass=NullPool)
+else:
+    from sqlalchemy import StaticPool, event
+
+    test_engine = create_async_engine(
+        "sqlite+aiosqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+
+    @event.listens_for(test_engine.sync_engine, "connect")
+    def _enable_fk(dbapi_conn, _connection_record):
+        cursor = dbapi_conn.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
 
 
 TestSessionLocal = async_sessionmaker(bind=test_engine, class_=AsyncSession, expire_on_commit=False)
@@ -48,7 +60,6 @@ async def _override_get_db():
             raise
 
 
-# Apply dependency overrides once
 app.dependency_overrides[get_db] = _override_get_db
 app.dependency_overrides[get_llm_router] = create_mock_router
 

@@ -55,6 +55,7 @@ source = ["backend/src"]
 concurrency = ["greenlet", "thread"]
 
 [tool.coverage.report]
+fail_under = 90
 omit = [
     "backend/src/saas_starter/ai/providers/openai_provider.py",
     "backend/src/saas_starter/ai/providers/anthropic_provider.py",
