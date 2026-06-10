@@ -12,3 +12,13 @@ class BatchEmbeddingProcessor:
             embeddings = await self.provider.embed_documents(batch)
             results.extend(embeddings)
         return results
+
+
+    async def process_with_retry(self, texts: list, retries: int = 3):
+        for attempt in range(retries):
+            try:
+                return await self.process_in_batches(texts)
+            except Exception:
+                if attempt == retries - 1:
+                    raise
+                await asyncio.sleep(1)
