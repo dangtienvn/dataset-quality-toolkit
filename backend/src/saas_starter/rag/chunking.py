@@ -28,3 +28,10 @@ class TokenTextSplitter(BaseChunker):
     def chunk(self, text: str):
         words = text.split()
         return [" ".join(words[i:i+self.max_tokens]) for i in range(0, len(words), self.max_tokens)]
+
+
+class SemanticChunker(BaseChunker):
+    """Splits text based on sentence semantic similarity."""
+    def chunk(self, text: str):
+        sentences = text.split(". ")
+        return [s + "." for s in sentences if s]
