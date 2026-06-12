@@ -19,3 +19,12 @@ class RecursiveCharacterChunker(BaseChunker):
             chunks.append(text[start:end])
             start += self.chunk_size - self.chunk_overlap
         return chunks
+
+
+class TokenTextSplitter(BaseChunker):
+    def __init__(self, max_tokens: int = 512):
+        self.max_tokens = max_tokens
+
+    def chunk(self, text: str):
+        words = text.split()
+        return [" ".join(words[i:i+self.max_tokens]) for i in range(0, len(words), self.max_tokens)]
