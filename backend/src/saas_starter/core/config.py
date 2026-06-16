@@ -41,3 +41,7 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+
+# Append RAG settings
+RAG_DEFAULT_TOP_K: int = 5
