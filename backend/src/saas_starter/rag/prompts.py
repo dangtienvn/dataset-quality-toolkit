@@ -6,3 +6,8 @@ Context:
 
 Question: {question}
 """
+
+
+SUMMARY_PROMPT = """Summarize the following document into key enterprise takeaways:
+{text}
+"""
