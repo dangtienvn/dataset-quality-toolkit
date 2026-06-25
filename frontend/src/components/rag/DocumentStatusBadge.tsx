@@ -12,3 +12,7 @@ export const DocumentStatusBadge: React.FC<{ status: string }> = ({ status }) =>
     </span>
   );
 };
+
+
+// Add accessible aria labels
+export default DocumentStatusBadge;
