@@ -104,3 +104,11 @@ async def app_error_handler(_request: Request, exc: AppError) -> JSONResponse:
 async def health() -> dict:
     """Health check endpoint."""
     return {"status": "ok", "version": "0.1.0"}
+
+
+from saas_starter.rag.error_handler import RAGException
+from fastapi.responses import JSONResponse
+
+@app.exception_handler(RAGException)
+def rag_exception_handler(request, exc):
+    return JSONResponse(status_code=400, content={"error": str(exc)})
