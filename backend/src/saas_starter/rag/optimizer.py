@@ -2,3 +2,8 @@ class QueryOptimizer:
     def rewrite_query(self, query: str) -> str:
         # Expand query synonyms
         return query.strip()
+
+
+    def hyde_expand(self, query: str) -> str:
+        """Hypothetical Document Embeddings (HyDE) expansion."""
+        return f"Hypothetical answer for: {query}"
