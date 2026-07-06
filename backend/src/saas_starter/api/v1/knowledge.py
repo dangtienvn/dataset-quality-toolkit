@@ -7,3 +7,8 @@ service = KnowledgeBaseService()
 @router.post("/datasets")
 async def create_dataset_endpoint(name: str):
     return service.create_dataset(name)
+
+
+@router.get("/datasets")
+async def list_datasets():
+    return list(service.datasets.values())
