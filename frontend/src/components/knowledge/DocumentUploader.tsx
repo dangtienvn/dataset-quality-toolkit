@@ -8,3 +8,7 @@ export const DocumentUploader: React.FC = () => {
     </div>
   );
 };
+
+
+// Add upload progress indicator
+export default DocumentUploader;
