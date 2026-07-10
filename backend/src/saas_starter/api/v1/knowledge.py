@@ -12,3 +12,8 @@ async def create_dataset_endpoint(name: str):
 @router.get("/datasets")
 async def list_datasets():
     return list(service.datasets.values())
+
+
+@router.get("/chunks/{chunk_id}")
+async def get_chunk_preview(chunk_id: str):
+    return {"id": chunk_id, "content": "Sample chunk content snippet"}
