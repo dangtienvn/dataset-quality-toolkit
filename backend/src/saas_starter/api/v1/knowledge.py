@@ -17,3 +17,8 @@ async def list_datasets():
 @router.get("/chunks/{chunk_id}")
 async def get_chunk_preview(chunk_id: str):
     return {"id": chunk_id, "content": "Sample chunk content snippet"}
+
+
+@router.post("/sync/s3")
+async def trigger_s3_sync(bucket: str):
+    return {"message": f"Sync scheduled for bucket {bucket}"}
