@@ -118,3 +118,8 @@ async def analyze(
 async def usage(user: CurrentUser, db: DBSession) -> dict:
     """Get AI usage summary for the current tenant."""
     return await get_usage_summary(db=db, tenant_id=user.tenant_id)
+
+
+@router.post("/chat/summarize")
+async def summarize_chat_endpoint(session_id: str):
+    return {"session_id": session_id, "summary": "Chat history summary..."}
