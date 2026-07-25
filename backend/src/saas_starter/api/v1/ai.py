@@ -123,3 +123,8 @@ async def usage(user: CurrentUser, db: DBSession) -> dict:
 @router.post("/chat/summarize")
 async def summarize_chat_endpoint(session_id: str):
     return {"session_id": session_id, "summary": "Chat history summary..."}
+
+
+@router.post("/chat/feedback")
+async def submit_feedback(message_id: str, rating: int):
+    return {"status": "received", "message_id": message_id}
