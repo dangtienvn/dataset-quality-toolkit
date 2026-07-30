@@ -112,3 +112,7 @@ from fastapi.responses import JSONResponse
 @app.exception_handler(RAGException)
 def rag_exception_handler(request, exc):
     return JSONResponse(status_code=400, content={"error": str(exc)})
+
+
+from saas_starter.core.middleware import SecurityHeadersMiddleware
+app.add_middleware(SecurityHeadersMiddleware)
