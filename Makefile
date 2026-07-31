@@ -25,3 +25,8 @@ migrate-create:
 
 frontend-dev:
 	cd frontend && npm run dev
+
+
+.PHONY: benchmark
+benchmark:
+	uv run pytest tests/e2e/ --benchmark
