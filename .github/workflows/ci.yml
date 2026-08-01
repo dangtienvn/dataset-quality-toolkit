@@ -87,3 +87,7 @@ jobs:
         working-directory: frontend
       - run: npm run build
         working-directory: frontend
+
+
+      - name: Run E2E Test Suite
+        run: uv run pytest tests/e2e/
