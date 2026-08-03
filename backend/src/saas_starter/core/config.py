@@ -45,3 +45,7 @@ settings = Settings()
 
 # Append RAG settings
 RAG_DEFAULT_TOP_K: int = 5
+
+
+# Update production settings
+MAX_UPLOAD_SIZE_MB: int = 50
