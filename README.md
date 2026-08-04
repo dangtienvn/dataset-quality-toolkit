@@ -240,3 +240,9 @@ make check         # lint + test (run before every commit)
 ## License
 
 MIT © 2026 ForwardCodeSolutions
+
+
+## RAG & Vector Engine Support
+- Supports PGVector, Qdrant, Chroma DB.
+- Hybrid search with Reciprocal Rank Fusion (RRF).
+- Built-in citation tracking and SSE token streaming.
