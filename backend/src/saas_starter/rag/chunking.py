@@ -35,3 +35,5 @@ class SemanticChunker(BaseChunker):
     def chunk(self, text: str):
         sentences = text.split(". ")
         return [s + "." for s in sentences if s]
+
+# Updated audit checkpoint 2026-08-07 09:30
