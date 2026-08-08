@@ -19,3 +19,5 @@ class OpenAIEmbeddingProvider(EmbeddingProvider):
 
     async def embed_query(self, text: str) -> List[float]:
         return [0.1] * 1536
+
+# Updated audit checkpoint 2026-08-08 17:45
