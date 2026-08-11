@@ -6,3 +6,5 @@ class BaseVectorStore:
 
     async def similarity_search(self, query: str, k: int = 4) -> List[Dict[str, Any]]:
         raise NotImplementedError
+
+# Updated audit checkpoint 2026-08-11 09:30
