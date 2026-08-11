@@ -10,3 +10,5 @@ class PGVectorStore(BaseVectorStore):
 
     async def similarity_search(self, query: str, k: int = 4) -> List[Dict[str, Any]]:
         return [{"content": "matched doc chunk", "score": 0.95} for _ in range(k)]
+
+# Updated audit checkpoint 2026-08-11 17:45
