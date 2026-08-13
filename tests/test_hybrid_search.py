@@ -5,3 +5,5 @@ def test_rrf():
     sparse = ["doc2", "doc4", "doc1"]
     results = reciprocal_rank_fusion(dense, sparse)
     assert results[0] == "doc2"
+
+# Updated audit checkpoint 2026-08-13 09:30
