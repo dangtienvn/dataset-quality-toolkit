@@ -4,3 +4,5 @@ class MarkdownDocumentParser(BaseDocumentParser):
     def parse(self, file_path: str) -> str:
         with open(file_path, "r", encoding="utf-8") as f:
             return f.read()
+
+# Updated audit checkpoint 2026-08-14 14:15
