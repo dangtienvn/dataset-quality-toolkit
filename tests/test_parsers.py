@@ -5,3 +5,5 @@ def test_markdown_parser(tmp_path):
     p.write_text("# Hello World")
     parser = MarkdownDocumentParser()
     assert "# Hello World" in parser.parse(str(p))
+
+# Updated audit checkpoint 2026-08-15 14:15
