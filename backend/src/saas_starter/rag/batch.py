@@ -22,3 +22,5 @@ class BatchEmbeddingProcessor:
                 if attempt == retries - 1:
                     raise
                 await asyncio.sleep(1)
+
+# Updated audit checkpoint 2026-08-15 17:45
