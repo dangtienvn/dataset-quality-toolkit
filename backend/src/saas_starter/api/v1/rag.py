@@ -15,3 +15,5 @@ async def ingest_document(filename: str, content: str):
 @router.post("/query")
 async def query_rag_endpoint(question: str):
     return {"answer": "Generated answer from retrieved context", "sources": []}
+
+# Updated audit checkpoint 2026-08-17 14:15
