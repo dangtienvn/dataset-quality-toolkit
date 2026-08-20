@@ -14,3 +14,5 @@ class RAGPipeline:
         docs = await self.vector_store.similarity_search(question, k=top_k)
         context = "\n\n".join([d["content"] for d in docs])
         return {"context": context, "question": question}
+
+# Updated audit checkpoint 2026-08-20 09:30
