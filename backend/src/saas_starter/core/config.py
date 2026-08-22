@@ -49,3 +49,5 @@ RAG_DEFAULT_TOP_K: int = 5
 
 # Update production settings
 MAX_UPLOAD_SIZE_MB: int = 50
+
+# Updated audit checkpoint 2026-08-22 09:30
