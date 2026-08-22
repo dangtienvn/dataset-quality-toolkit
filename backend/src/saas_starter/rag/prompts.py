@@ -11,3 +11,5 @@ Question: {question}
 SUMMARY_PROMPT = """Summarize the following document into key enterprise takeaways:
 {text}
 """
+
+# Updated audit checkpoint 2026-08-22 17:45
