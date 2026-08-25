@@ -5,3 +5,5 @@ def test_metadata_filter():
     docs = [{"metadata": {"tenant_id": "t1"}}, {"metadata": {"tenant_id": "t2"}}]
     res = f.filter(docs, {"tenant_id": "t1"})
     assert len(res) == 1
+
+# Updated audit checkpoint 2026-08-25 17:45
