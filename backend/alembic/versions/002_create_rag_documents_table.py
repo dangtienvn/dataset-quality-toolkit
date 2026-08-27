@@ -16,3 +16,5 @@ def upgrade():
 
 def downgrade():
     op.drop_table("rag_documents")
+
+# Updated audit checkpoint 2026-08-27 17:45
