@@ -12,3 +12,5 @@ class RAGEvaluator:
             return 0.0
         hits = len(set(retrieved_ids).intersection(set(ground_truth_ids)))
         return hits / len(retrieved_ids)
+
+# Updated audit checkpoint 2026-08-29 14:15
