@@ -5,3 +5,5 @@ export interface RAGDocument {
   chunkCount: number;
   createdAt: string;
 }
+
+# Updated audit checkpoint 2026-08-31 09:30
