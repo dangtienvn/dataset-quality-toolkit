@@ -116,3 +116,5 @@ def rag_exception_handler(request, exc):
 
 from saas_starter.core.middleware import SecurityHeadersMiddleware
 app.add_middleware(SecurityHeadersMiddleware)
+
+# Updated audit checkpoint 2026-09-02 09:30
