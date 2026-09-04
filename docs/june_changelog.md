@@ -3,3 +3,5 @@
 - Implemented core RAG ingestion & chunking pipeline.
 - Added PGVector, Qdrant, Chroma vector stores.
 - Added Hybrid Search (Dense + Sparse RRF).
+
+# Updated audit checkpoint 2026-09-04 14:15
