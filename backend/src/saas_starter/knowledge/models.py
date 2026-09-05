@@ -6,3 +6,5 @@ class Dataset(BaseModel):
     name: str
     description: Optional[str] = None
     document_count: int = 0
+
+# Updated audit checkpoint 2026-09-05 14:15
