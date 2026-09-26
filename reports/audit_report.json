@@ -1,0 +1,72 @@
+{
+  "dataset_name": "annotations",
+  "dataset_format": "coco",
+  "total_images": 1,
+  "total_annotations": 1,
+  "class_distribution": {
+    "class_counts": {
+      "person": 1
+    },
+    "class_percentages": {
+      "person": 100.0
+    },
+    "imbalance_ratio": 1.0,
+    "most_frequent_class": "person",
+    "least_frequent_class": "person",
+    "co_occurrence_matrix": {
+      "person": {
+        "person": 1
+      }
+    }
+  },
+  "annotation_statistics": {
+    "total_images": 1,
+    "total_annotations": 1,
+    "avg_annotations_per_image": 1.0,
+    "max_annotations_per_image": 1,
+    "min_annotations_per_image": 1,
+    "size_distribution": {
+      "small (<32x32)": 0,
+      "medium (32x32 to 96x96)": 0,
+      "large (>96x96)": 1
+    },
+    "aspect_ratio_stats": {
+      "mean": 0.5,
+      "median": 0.5,
+      "std": 0.0
+    }
+  },
+  "validation_summary": {
+    "MetadataValidator": {
+      "total_checked": 1,
+      "passed": 1,
+      "failed": 0,
+      "warnings": 0
+    },
+    "AnnotationValidator": {
+      "total_checked": 1,
+      "passed": 1,
+      "failed": 0,
+      "warnings": 0
+    },
+    "ImageValidator": {
+      "total_checked": 1,
+      "passed": 1,
+      "failed": 0,
+      "warnings": 0
+    },
+    "BBoxMaskValidator": {
+      "total_checked": 1,
+      "passed": 1,
+      "failed": 0,
+      "warnings": 0
+    },
+    "DuplicateDetector": {
+      "total_checked": 1,
+      "passed": 1,
+      "failed": 0,
+      "warnings": 0
+    }
+  },
+  "issues": []
+}

@@ -1,0 +1,19 @@
+# Dataset Quality Toolkit - Default Configuration
+
+metadata:
+  compute_checksums: true
+
+annotation:
+  warn_empty_image: true
+
+image:
+  max_aspect_ratio: 10.0
+  min_aspect_ratio: 0.1
+  min_resolution: [10, 10]
+
+bbox_mask:
+  min_bbox_size: 2.0
+  strict_out_of_bounds: false
+
+duplicate:
+  max_hamming_distance: 2 # 0: exact perceptual match, <= 2: near duplicates
